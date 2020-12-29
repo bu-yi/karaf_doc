@@ -1,0 +1,931 @@
+h2. 4.17. Enterprise
+
+h3. 4.17.1. Http Service
+
+karaf는 몇가지 Http Service 를 제공한다.
+* @http@ 기능은 Pax Web에서 제공하는 Http 서비스를 설치
+* @felix-http@ 기능은 Apache Felix HTTP로 구동되는 Http 서비스를 설치
+
+*Http Service 설치*
+
+Pax Web Http Service 를 원한다면 @http@ 기능을 설치
+<pre>
+root@karaf()> feature:install http
+</pre>
+주의 : HTTP 서비스는 적어도 하나의 웹 응용 프로그램에서 사용할 때만 실제로 바인딩됩니다.
+
+Apache Felix Http Service를 사용하려면 다음 @felix-http@기능을 설치
+<pre>
+root@karaf()> feature:install felix-http
+</pre>
+
+테스트용  HTTP service를 원한다면 @webconsole@ 기능 설치
+<pre>
+root@karaf()> feature:install webconsole
+</pre>
+
+그럼  [http://localhost:8181/system/console] 에서 HTTP 서비스를 테스트 할 수 있습니다.
+
+
+*Http Service 설정*
+
+기본 HttpService 포트는 8181 이지만 @etc/org.ops4j.pax.web.cfg@ 파일을 생성(Pax Web Http Service 일 경우)해 아래와 같이 입력하거나
+<pre>
+org.osgi.service.http.port=8181
+</pre>
+다음명령어를 이용해 변경할 수 있다.
+<pre>
+root@karaf> config:property-set -p org.ops4j.pax.web org.osgi.service.http.port 8181
+</pre>
+
+http기능이 이미 설치되어 있으면 변경 사항이 즉시 적용됩니다.
+
+Felix Http Service 에서는 @etc/org.apache.felix.http.cfg@ 에 동일한 구성
+
+*HttpService에 수동으로 서블릿 등록*
+
+karaf 서블릿 예제  [https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example/karaf-servlet-example-registration]
+
+*Pax Web whiteboard extender 사용*
+
+The Pax Web whiteboard extender는 향상된 http 기능입니다.
+설치
+<pre>
+karaf@root()> feature:install war
+</pre>
+주의 : felix-http기능은 기본적으로 기능에 화이트 보드를 설치합니다.
+
+예제 [https://github.com/apache/karaf/tree/master/examples/karaf-servlet-example]
+
+명령어는 *+_4.17.2. WebContainer (JSP/Servlet)_+* 에 명령어 부분 참고 
+
+h3. 4.17.2. WebContainer (JSP/Servlet)
+
+Karaf WebContainer는 다음을 지원한다.
+* OSGi 고유 웹 애플리케이션 인 WAB (WebApplication Bundles)
+* 비 OSGi 웹 애플리케이션 인 WAR (WebApplication aRchives) (Apache Tomcat과 같은 웹 컨테이너에 배포 할 수있는 것과 동일)
+
+Karaf WebContainer를 활성화하기위해 @war@ 기능을 설치한다.
+<pre>
+karaf@root()> feature:install war
+</pre>
+ +) @webconsole@ 기능을 설치할경우 자동으로 war 기능이 설치된다.
+
+이 war기능은 다음을 제공합니다.
+* 구성이 포함된 임베디드 웹 컨테이너 (Jetty에 의해 구동)
+* 일련의 콘솔 명령
+* 새로운 war 배포자
+
+*Configuration*
+
+@etc/org.ops4j.pax.web.cfg@ 에 기본값이다.
+<pre>
+org.osgi.service.http.port=8181
+</pre> 
+
+*Deploy*
+*WAB (WebApplication Bundle)*
+*WAR (WebApplication aRchive)*
+*HTTP proxy*
+
+*Commands*
+@http:list@
+@web:list@
+@web:stop@
+@web:start@
+@http:proxy-list@
+@http:proxy-add@
+@http:proxy-balancing-list@
+@http:proxy-remove@
+
+*JMX HttpMBean*
+
+HttpMBean의 오브젝트 네임은 @org.apache.karaf:type=http,name=*@ 이다
+[Attributes]
+@Servlets@
+-Alias 
+-Bundle-ID
+-Servlet
+-State
+-URL
+@Proxies@
+-URL
+-proxyTo
+-prefix
+@ProxyBalacingPolicies@
+
+[Operations]
+
+@addProxy(url, proxyTo, prefix)@
+@removeProxy(url)@
+
+*JMX WebMBean*
+
+WebMBean의 오브젝트명은 @org.apache.karaf:type=web,name=*@
+
+[Attributes]
+@WebBundles@
+-ID 
+-Level 
+-Name 
+-State 
+-Web-ContextPath
+-Web-State
+
+[Operations]
+@start(id)@
+@start(list)@
+@stop(id)@
+@stop(list)@
+
+h3. 4.17.3. Naming (JNDI)
+
+Karaf Naming (JNDI) 은 선택적 엔터프라이즈 기능이다.
+설치
+<pre>
+karaf@root()> feature:install jndi
+</pre>
+
+JNDI 가 지원하는 두가지
+* OSGi Alliance JNDI 서비스 사양의 완전 호환 구현.
+* 더 많은 다른 관리 할 수 있는 이름들을 포함하는"일반적인" JNDI 컨텍스트 (?)
+
+*OSGi Services Registry and JNDI*
+*JNDI service*
+*Commands*
+@jndi:names@
+@jndi:contexts@
+@jndi:create@
+@jndi:alias@
+@jndi:bind@
+@jndi:unbind@
+
+*JMX JndiMBean*
+[Attributes]
+@Names@
+@Contexts@
+[Operations]
+@getNames(context)@
+@create(context)@
+@delete(context)@
+@alias(name, alias)@
+@bind(serviceId, name)@
+@unbind(name)@
+
+h3. 4.17.4. Transaction (JTA)
+
+Karaf는 OSGi 서비스로 사용할 수있는 컨테이너 관리 트랜잭션을 제공합니다.
+대부분의 엔터프라이즈 기능은 아래 명령어로 설치하는 선택적 기능이다 
+<pre>
+karaf@root()> feature:install transaction
+</pre>
+
+하지만 @transaction@ 기능은 엔터프라이즈 기능들을 설치할때 설치 될 것이다.
+
+*Apache Aries Transaction and ObjectWeb HOWL*
+
+transaction 기능은 Apache Aries 과 ObjectWeb HOWL을 이용한다. 
+Aapache Aries Transaction은 트랜잭션 관리자를 OSGi 서비스로 "노출"합니다.  트랜잭션 관리자의 실제 구현은 ObjectWeb HOWL가 한다.
+
+*Configuration*
+@transaction@ @org.apache.aries.transaction@
+
+@aries.transaction.recoverable@
+@aries.transaction.timeout@
+@aries.transaction.howl.logFileDir@
+@aries.transaction.howl.maxLogFiles@
+
+h3. 4.17.5. DataSources (JDBC)
+
+설치
+<pre>
+karaf@root()> feature:install jdbc
+</pre>
+자동적으로 @pax-jdbc-*@ 코어 기능 설치
+
+지원하는 DB 어뎁터
+* pax-jdbc-derby
+* pax-jdbc-derbyclient
+* pax-jdbc-h2
+* pax-jdbc-mariadb
+* pax-jdbc-mysql
+* pax-jdbc-oracle
+* pax-jdbc-postgresql
+* pax-jdbc-sqlite
+* pax-jdbc-mssql
+
+*Commands*
+
+@jdbc:ds-factories@
+@jdbc:ds-create@
+@jdbc:ds-delete@
+@jdbc:ds-list@
+@jdbc:ds-info@
+@jdbc:execute@
+@jdbc:query@
+@jdbc:tables@
+
+*JMX JDBC MBean*
+
+오브젝트 네임 @org.apache.karaf:type=jdbc,name=*@
+
+[Attributes]
+@Datasources@
+-name
+-service.id
+-product
+-url
+-version
+
+[Operations]
+@create(name, type, jdbcDriverClassName, version, url, user, password, installBundles)@
+@delete(name)@
+@info(datasource)@
+@tables(datasource)@
+@execute(datasource, command)@
+@query(datasource, query)@
+
+h3. 4.17.6. JMS
+
+Apache Karaf MOM (Messaging Oriented Middleware/JMS)는 선택적 엔터프라이즈 기능이다.
+
+설치
+<pre>
+karaf@root()> feature:install jms
+</pre>
+jms 기능은 JMS broker를 설치하는 것이 아닙니다. 
+JMS broker 와 상호작용하는  OSGi service, commands, MBean 를 설치할 뿐입니다.
+JMS broker는 따로 설치하세요
+
+ JMS broker는 
+* 독립형 브로커로서 Apache Karaf 외부에 있습니다. 이 경우 Apache Karaf JMS는 JMS 브로커에 원격으로 연결합니다. 예를 들어 Apache ActiveMQ 또는 IBM WebsphereMQ와 함께이 토폴로지를 사용할 수 있습니다.
+* Apache Karaf에 포함되어 있습니다. 이 토폴로지를 통해 Apache Karaf 자체는 JMS 브로커 서비스를 제공합니다. Apache ActiveMQ는 Apache Karaf에서 기본 지원을 제공합니다.
+
+예시 : karaf 에 Apache ActiveMQ 설치
+<pre>
+karaf@root()> feature:repo-add activemq
+Adding feature url mvn:org.apache.activemq/activemq-karaf/LATEST/xml/features
+karaf@root()> feature:install activemq-broker
+</pre>
+@activemq-broker@ 기능이 설치하는 것 
+* Apache Karaf에서 직접 Apache ActiveMQ 브로커로, 기본적으로 61616 포트 번호로 바인딩됩니다.
+* Apache ActiveMQ WebConsole은 http://0.0.0.0:8181/activemqweb에 바인딩
+
+@jms@ 컨테이너에 있는 JMS connection factories를 생성/삭제와 JMS operations(메세지 송수신, JMS 브로커 정보 조회, 목적지 목록 등등 ) 기능을 제공한다.
+
+@jms:*@ 명령어 사용이나 JMSMBean 사용하는 프로그래밍 방식 으로 조작 가능
+
+*Commands*
+@jms:create@
+@jms:delete@
+@jms:connectionfactories@
+@jms:info@
+@jms:queues@
+@jms:topics@
+@jms:send@
+@jms:consume@
+@jms:count@
+@jms:browse@
+@jms:move@
+
+*JMX JMS MBean*
+
+오브젝트 네임 @org.apache.karaf:type=jms,name=*@
+
+[Attributes]
+@Connectionfactories@
+[Operations]
+@create(name, type, url)@
+@delete(name)@
+@Map<String, String> info(connectionFactory, username, password)@
+@int count(connectionFactory, queue, username, password)@
+@List<String> queues(connectionFactory, username, password)@
+@List<String> topics(connectionFactory, username, password)@
+@TabularData browse(connectionFactory, queue, selector, username, password)@
+@send(connectionFactory, queue, content, replyTo, username, password)@
+@int consume(connectionFactory, queue, selector, username, password)@
+@int move(connectionFactory, source, destination, selector, username, password)@
+
+h3. 4.17.7. Persistence (JPA)
+
+karaf는 사용하기 쉽도록 Apache OpenJPA같은 JPA 지속 공급자 (persistence providers)를 제공한다. 그리고 애플리케이션에 컨테이너 관리 지속성을 제공합니다 (Blueprint 사용).
+Apache Karaf는 Aries JPA를 포함하여 JPA 지속성을 사용하는 애플리케이션을 매우 쉽게 개발할 수있는 방법을 제공합니다.
+
+*Persistence engine features*
+Apache OpenJPA
+<pre>
+karaf@root()> feature:install openjpa
+</pre>
+Hibernate
+<pre>
+karaf@root()> feature:install hibernate
+</pre>
+EclipseLink
+<pre>
+karaf@root()> feature:install eclipselink
+</pre>
+
+h3. 4.17.8. EJB
+
+이 부분은 karaf의 EJB 지원을 추가하는 것에 대해 설명한다. EJB 어플리케이션 개발에 대한 것이 아니다.
+
+*Apache OpenEJB*
+karaf는 EJB(Enterprise Java Beans) 의 기본 지원을 제공하지 않는다.
+Apache OpenEJB는 일련의 기능을 제공하여 Apache Karaf에 대한 EJB 지원을 제공합니다.
+OpenEJB를 완벽하게 지원하려면 일부 Karaf 구성을 업데이트해야합니다.
+
+@etc/system.properties@ 속성 추가
+<pre>
+openejb.deployments.classpath.exclude=bundle:*
+openejb.deployments.classpath.filter.descriptors=true
+</pre>
+
+몇몇 OpenEJB 버전 제약 때문에 @javax.xml.namespace@ 패키지의 버전을 바꿈으로써 @etc/jre.properties@를 업데이트 해야한다.  그리고 @javax.annotation@ 패키지의 버전을 삭제해야한다.
+<pre>
+...
+javax.annotation, \
+javax.annotation.processing, \
+...
+javax.xml.namespace;version="1.0.0", \
+...
+</pre>
+OpenEJB 번들 스캐닝을 활성화하여 EJB를 찾는다.
+설정변경 후 재시작 하면 OpenEJB  기능을 설치할 수 있다.
+<pre>
+karaf@root()> feature:repo-add openejb
+</pre>
+기본값으로 @feature:repo-add openejb@ 명령어는 최신 버전 OpenEJB를 설치한다. 
+@version@ 인자값으로 특정 버전을 사용할 수 있다.
+<pre>
+karaf@root()> feature:repo-add openejb 4.5.2
+</pre>
+
+이제 Apache Karaf 컨테이너에서 사용할 수있는 새로운 OpenEJB 기능 세트가 있습니다.
+
+<pre>
+karaf@root()> la
+...
+openejb-core                  | 4.5.2 |           | openejb-features          |
+openejb-server                | 4.5.2 |           | openejb-features          |
+openejb-cxf                   | 4.5.2 |           | openejb-features          |
+openejb-rest                  | 4.5.2 |           | openejb-features          |
+openejb-soap                  | 4.5.2 |           | openejb-features          |
+</pre>
+
+@openejb-core@ 기능을 설치해서 EJB 지원을 추가할 수 있습니다.
+
+<pre>
+karaf@root()> feature:install openejb-core
+</pre>
+
+*Apache KarafEE*
+
+OpenEJB를 포함하는 Apache Karaf의 사용자 지정 배포는 Apache TomEE 프로젝트에서 사용할 수 있습니다.
+
+이 사용자 지정 배포의 이름은 KarafEE [https://svn.apache.org/repos/asf/tomee/karafee/]
+이프로젝트는 현재 "deprecated"이다.  그리고 KarafEE의 모든 리소스는 karaf로 곧 옮겨질 것 이다.
+
+h3. 4.17.9. CDI
+
+이 구간은 karaf에 CDI 지원 추가, CDI 컨테이너 추가 에 대한 부분이지 CDI 어플리케이션 개발에 대한것이 아니다. 그부분은 개발자 가이드에서 볼 수 있다.
+
+*Pax CDI* 
+karaf는 Pax CDI를 사용한 다양한 CDI컨테이너들을 제공한다.
+Pax CDI 는 karaf 에 미리 로드 되어 있습니다.
+
+사용 가능한 새로운 CDI 기능 세트 목록
+<pre>
+karaf@root()> feature:list|grep -i cdi
+</pre>
+
+*CDI Containers*
+Pax CDI 덕분에 Karaf는 여러 CDI 구현 버전과 다양한 CDI 컨테이너를 지원합니다.
+사용하려는 CDI 컨테이너 및 버전에 해당하는 기능을 설치하기 만하면됩니다.
+
+*Apache OpenWebBeans*
+Apache Karaf는 Apache OpenWebBeans에 바로 사용할 수 있는 기능을 제공합니다.
+이 @openwebbeans@기능은 Pax CDI 기능과 Apache OpenWebBeans 번들을 자동으로 설치합니다
+<pre>
+karaf@root()> feature:install http
+karaf@root()> feature:install pax-cdi-openwebbeans
+</pre>
+
+*JBoss Weld CDI container*
+
+Apache Karaf는 JBoss Weld에 바로 사용할 수있는 기능을 제공합니다.
+이 @weld@기능은 Pax CDI 기능과 JBoss Weld 번들을 자동으로 설치합니다.
+<pre>
+karaf@root()> feature:install pax-cdi-weld
+</pre>
+
+h3. 4.17.10. HA/failover and cluster
+
+Apache Karaf는 기본적으로 장애 조치 메커니즘을 제공합니다. 한 인스턴스가 활성 상태이고 다른 인스턴스가 대기 상태 인 일종의 master/slave토폴로지를 사용합니다.
+Apache Karaf 인스턴스 (활성/활성) 클러스터를 찾고 있다면 Apache Karaf Cellar 가 솔루션입니다.
+
+*HA/failover (active/passive)*
+Apache Karaf 장애 조치 기능은 lock 시스템을 사용합니다.
+이 컨테이너 수준 lock 시스템을 사용하면 마스터에 설치된 번들을 슬레이브에 미리로드하여보다 빠른 장애 조치 성능을 제공 할 수 있습니다.
+
+lock 지원
+* 파일 시스템 잠금
+* 데이터베이스 잠금
+
+첫 번째 인스턴스가 시작될 때 잠금을 사용할 수 있으면 잠금을 가져와 마스터가됩니다. 
+두 번째 인스턴스가 시작되면 잠금 획득을 시도합니다.
+마스터가 잠금을 이미 보유하고 있으므로 인스턴스는 대기 모드 (활성화되지 않음)에서 슬레이브가됩니다. 
+슬레이브는 잠금이 해제되었는지 주기적으로 확인합니다.
+
+*Filesystem lock*
+*Database lock*
+*Container-level locking*
+*Cluster (active/active)*
+
+
+h2. 4.18. Monitoring and Management using JMX
+
+karaf 는 모든 JMX layer를 제공한다.
+JMX 클라이언트 (예 : jconsole)를 사용하여 실행중인 Apache Karaf 인스턴스에 원격으로 연결할 수 있습니다.
+Apache Karaf 기능은 모니터링 및 관리 전용 MBean 세트를 제공합니다.
+
+h3. 4.18.1. Connecting
+
+Apache Karaf는 원격으로 사용할 수있는 완전한 MBean 서버를 제공합니다.
+기본 포트 번호는 1099입니다.
+기본적으로 사용할 JMX URL은 다음과 같습니다
+<pre>
+service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root
+</pre>
+다음으로 중지할 수 있습니다.
+<pre>
+-Dcom.sun.management.jmxremote
+</pre>
+bin/karaf | bin/karaf.bat에서 RMI 수신 포트를 열지 않도록합니다.
+
+JMX 계층에 액세스하려면 사용자 이름과 암호를 제공해야합니다. JMX 계층은 보안 프레임 워크를 사용하므로 기본적으로 @etc/users.properties@에 정의 된 사용자를 사용합니다 .
+
+@etc/org.apache.karaf.management.cfg@구성 파일 에서 JMX 계층의 포트 번호를 변경할 수 있습니다 .
+
+h3. 4.18.2. Configuration
+
+Apache Karaf JMX 관리 계층은 @etc/org.apache.karaf.management.cfg@구성 파일 에서 구성됩니다.
+
+기본적으로 Karaf 는 RMI를 사용해 JMX를 노출 시킨다.
+@mxmpEnabled=true@를 설정하여 JMXMP 커넥터를 활성화할 수도 있습니다. 
+그런 다음 해당 @jmxmp*@ 속성을 사용하여 JMXMP 커넥터를 구성할 수 있습니다. 
+JMXMP를 사용하려면 @lib/boot@ 폴더에 @openmk_jmx remote_optional@ jar를 추가해야 합니다.
+<pre>
+$ cd lib/boot
+$ curl -O https://repo1.maven.org/maven2/org/glassfish/external/opendmk_jmxremote_optional_jar/1.0-b01-ea/opendmk_jmxremote_optional_jar-1.0-b01-ea.jar
+$ cd ../../bin
+$ ./karaf
+</pre>
+
+h3. 4.18.3. MBeans
+
+karaf는 매우 다양한 MBean들을 제공한다.
+
+오브젝트 네임 포맷은 다음과같다.
+<pre>
+org.apache.karaf:type=[feature],name=[instance]
+</pre>
+
+추가 Apache Karaf 기능 및 외부 응용 프로그램을 설치하면 새로운 MBean을 제공할 수 있습니다.
+
+몇가지 MBean 목록
+[http://karaf.apache.org/manual/latest/#_mbeans]
+
+h3. 4.18.4. RBAC
+
+Apache Karaf는 JMX MBean 및 작업에 대한 완전한 역할 기반 액세스 제어(Role-Based Access Control)를 제공합니다.
+JMX 작업이 호출 될 때마다이 작업에 필요한 역할에 대해 사용자의 역할을 확인합니다.
+액세스 목록은 etc폴더의 구성 파일에 정의되어 있습니다 .
+관련 구성은 @jmx.acl@적용되는 JMX ObjectName을 기반으로하는 접두어가 붙습니다.
+
+예를 들어, 객체 이름을 가진 MBean에 대한 특정 구성 @foo.bar:type=Test@은 @etc/jmx.acl.foo.bar.Test.cfg@구성 파일에 배치 될 수 있습니다.
+보다 일반적인 구성은 도메인 (예 : jmx.acl.foo.bar.cfg) 또는 최상위 수준 (jmx.acl.cfg)에 배치 할 수 있습니다.
+간단한 구성 파일은 다음과 같습니다.
+<pre>
+# operation = role
+    test = admin
+    getVal = manager, viewer
+</pre>
+Apache Karaf는 다음 프로세스를 사용하여 필요한 역할을 찾습니다. 
+가장 구체적인 구성 파일이 먼저 시도됩니다. 
+앞의 예에서는 @etc/jmx.acl.foo.bar.Test.cfg@를 먼저 본다는 뜻입니다. 
+이 구성에서 Apache Karaf는 다음을 찾습니다.
+
+# 호출에 대한 특정 일치, 예 : @test(int)["17"]=role1@
+# 호출에 대한 정규식 일치, 예를 들어 @test(int)[/[0-9]/]=role2@ 두 경우 모두 전달 된 인수가 비교를 위해 문자열로 변환됩니다. 위와 일치하는 항목이 있으면 검색이 중지되고 관련 역할이 사용됩니다.
+# 호출에 대한 서명 일치 (예 : @test(int)=role3@ 일치하는 경우) 검색이 중지되고 연관된 역할이 사용됩니다.
+# 호출에 대한 메소드 이름 일치 (예 : @test=role4@ 일치하는 경우) 검색이 중지되고 연관된 역할이 사용됩니다.
+# 메소드 이름 와일드 카드 일치 (예 : @te*=role5@ 현재 구성 파일에서 찾은 모든 와일드 카드 일치에 대해 가장 긴 일치와 연관된 역할이 사용됩니다. 따라서 te * 및 *가 있고 호출 된 메서드가 test 인 경우 *로 정의 된 역할이 아니라 te *로 정의 된 역할이 사용됩니다.
+
+h3. 4.18.5. JMX-HTTP bridge with Jolokia
+
+RMI 프로토콜과 함께 JMX 클라이언트를 사용하는 것이 항상 쉬운 것은 아닙니다.
+일부 모니터링 도구 (Nagios, Zabbix,…)는 기본 JMX 클라이언트가 아닙니다.
+그러나 대부분은 HTTP를 사용할 수 있습니다.
+더 나아가 자신의 응용 프로그램 / 웹 응용 프로그램을 작성하는 것이 좋습니다. 이 경우 HTTP 및 JSON은 매우 흥미롭고 Apache Karaf를 원격으로 쉽게 관리 할 수 ​​있습니다.
+Jolokia 는 Apache Karaf에 원격 JMX-HTTP 브리지로 설치할 수 있습니다.
+Karaf는 즉시 설치할 수있는 jolokia 기능을 제공합니다 (먼저 Http 서비스를 설치하면됩니다).
+
+<pre>
+karaf@root()> feature:install http
+karaf@root()> feature:install jolokia
+</pre>
+
+기본적으로 jolokia는 8181 포트를 리스닝하고 있음
+[ http://localhost:8181/jolokia] 를 접속하면 다음과같은 JSON output을 볼 수 있음
+<pre>
+{"timestamp":1421765829,"status":200,"request":{"type":"version"},"value":{"protocol":"7.2","config":{"useRestrictorService":"false","canonicalNaming":"true","includeStackTrace":"true","listenForHttpService":"true","historyMaxEntries":"10","agentId":"192.168.134.10-5922-6eb8d517-osgi","debug":"false","realm":"karaf","serializeException":"false","agentContext":"\/jolokia","agentType":"servlet","policyLocation":"classpath:\/jolokia-access.xml","user":"karaf","debugMaxEntries":"100","authMode":"jaas","mimeType":"text\/plain"},"agent":"1.2.4-SNAPSHOT","info":{"product":"felix","vendor":"Apache","version":"4.4.1"`}
+</pre>
+HTTP 및 JSON, 시스템 도구 (예 curl: jmx4perl, 모니터링 도구 (HTTP / JSON 지원) 또는 웹 애플리케이션) 를 통해 Apache Karaf JMX 레이어를 조작 할 수 있습니다 .
+
+예를 들어 현재 Apache Karaf 힙 메모리 사용량에 대한 세부 정보를 얻기 위해 JSON 요청을 보낼 수 있습니다.
+
+요청 형식
+<pre>
+{
+    "type":"read",
+    "mbean":"java.lang:type=Memory",
+    "attribute":"HeapMemoryUsage",
+    "path":"used"
+}
+</pre>
+
+@curl@ 을 통해 받은 결과
+
+<pre>
+curl -u karaf -d "{\"type\":\"read\",\"mbean\":\"java.lang:type=Memory\",\"attribute\":\"HeapMemoryUsage\",\"path\":\"used\"}" http://localhost:8181/jolokia/ && echo ""
+Enter host password for user 'karaf':
+{"timestamp":1421765948,"status":200,"request":{"mbean":"java.lang:type=Memory","path":"used","attribute":"HeapMemoryUsage","type":"read"},"value":69121000}
+</pre>
+더 자세한 내용은 https://jolokia.org/documentation.html 에서
+
+h3. 4.18.6. Apache Karaf Decanter
+
+Apache Karaf Decanter는 데이터 기록, 턴키 대시 보드, SLA 및 경고 지원을 포함한 완벽한 모니터링 솔루션을 제공합니다.
+
+h2. 4.19. WebConsole
+
+Apache Karaf는 선택적 WebConsole을 제공합니다.
+이 WebConsole은 Apache Karaf 컨테이너를보고 관리 할 수있는 그래픽 웹 GUI를 제공합니다.
+WebConsole을 사용하여 다음을 수행 할 수 있습니다.
+
+* Apache Karaf 기능 관리
+* OSGi 번들 관리
+* 인스턴스 관리
+* 구성을 관리
+* 로그 서비스 관리
+
+WebConsole은 플러그인 시스템을 통해 확장 할 수 있습니다. 일부 애플리케이션은 웹 콘솔에 새 페이지를 추가 할 수 있습니다. 
+예를 들어 Apache Karaf Cellar는 클러스터 그룹, 노드 등을 관리하기위한 추가 페이지를 제공합니다.
+
+h3. 4.19.1. Installation
+
+Apache Karaf WebConsole을 활성화하려면 다음 @webconsole@기능을 설치
+
+<pre>
+karaf@root()> feature:install http
+karaf@root()> feature:install webconsole
+</pre>
+먼저 @http@또는 @felix-http@기능의 요구 사항으로 Http 서비스를 설치해야함
+@webconsole@기능은 자동적으로 @http@ 기능을 설치합니다.
+
+h3. 4.19.2. Access
+
+Apache Karaf WebConsole은 @/system/console@컨텍스트와 함께 WebContainer 포트 번호 (자세한 내용은 [WebContainer 섹션 | webcontainer] 참조)를 사용
+
+포트번호는 8181
+http://localhost:8181/system/console 으로 접속 가능
+Apache Karaf WebConsole이 보안 프레임 워크를 사용하기 때문에 사용자 이름과 암호가 프롬프트됩니다.
+
+karaf 영역 에서 사용자 이름 / 암호를 입력해야합니다 . 기본적으로 karaf/karaf 를 사용할 수 있습니다 .
+
+@etc/org.apache.karaf.webconsole.cfg@에서 보안 구성을 변경
+
+<pre>
+# The JAAS realm name to use for authentication
+realm=karaf
+
+# The role required to access the WebConsole
+role=admin
+</pre>
+
+
+h2. 4.20. Scheduler
+
+Apache Karaf는 서비스 속성을 기반으로 실행 가능한 서비스를 수신하고 실행을 예약하는 서비스 리스너를 제공하는 선택적 스케줄러를 제공합니다.
+이 스케줄러 구현은 Quartz Scheduler 라이브러리를 사용하여 cron과 유사한 표현식을 이해합니다.
+
+h3. 4.20.1. 설치
+
+Apache Karaf 스케줄러를 활성화하려면 다음 scheduler기능을 설치하기만 하면 됩니다. 
+
+<pre>
+karaf@root()> feature:install scheduler
+</pre>
+
+이 scheduler기능은 scheduler명령 그룹도 자동으로 설치합니다 .
+
+@scheduler:list@
+@scheduler:schedule-script@
+@scheduler:schedule-command@
+@scheduler:unschedule@
+@scheduler:reschedule@
+
+h3. 4.20.2. Configuration
+
+모든 작업은 서비스 속성을 사용하여 구성 할 수 있습니다.
+
+
+|_. Property |_. Default |_. Description |
+|Scheduler.PROPERTY_SCHEDULER_PERIOD | - | 작업 기간을 정의합니다. 기간은 초 단위로 표시됩니다. 이 속성은 Long 유형이어야합니다.|
+|Scheduler.PROPERTY_SCHEDULER_TIMES | -1 |  작업이 실행되는 횟수를 정의합니다. -1은 무한을 의미합니다.|
+|Scheduler.PROPERTY_SCHEDULER_IMMEDIATE | false | 주기적으로 작업을 즉시 예약해야하는지 정의합니다. 기본값은 즉시 시작하지 않는 것입니다. 작업은 기간이 만료 된 후 처음으로 시작됩니다. 이 속성은 부울 유형이어야합니다.|
+|Scheduler.PROPERTY_SCHEDULER_EXPRESSION | - | 작업에 대한 cron 표현식을 정의하십시오. Quartz 호환 표현식이어야합니다.|
+|Scheduler.PROPERTY_SCHEDULER_CONCURRENT | - | 작업을 동시에 실행할 수 있는지 정의하십시오.|
+|Scheduler.PROPERTY_SCHEDULER_NAME | - | 작업 이름을 정의하십시오.|
+
+h3. 4.20.3. Schedule a new Job using the Whitebox-Service paradigm (recommended)
+
+Whitebox-Service 패러다임을 사용하여 새 작업 예약 (권장)
+
+이 예에서는 선언적 서비스를 사용하여 "@org.apache.karaf.scheduler.Job@"유형의 서비스를 등록하여 스케줄러 서비스에서 인식되도록합니다.
+
+또는,  API 중립적인 방식으로 작업들을 "@Runnable@" 유형으로 등록할 수 있습니다.
+이 경우 "@JobContext@"정보를 얻을 수 없습니다.
+
+<pre>
+@Component(immediate = true, property = {
+        Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 0/10 * * * ?",
+} )
+public class SchedulerPing implements Job {
+
+    @Override
+    public void execute(JobContext context) {
+        // ..
+    }
+}
+</pre>
+
+WhiteboxHandler를 사용해 작업을 등록하였습니다. 등록된 작업 확인 : 
+
+<pre>
+karaf@root()> scheduler:list
+Name                   │ Schedule
+───────────────────────┼─────────────────────
+Registered Service.185 │ cron(0 0/10 * * * ?)
+</pre>
+
+Karaf 스케줄러는 Runnable서비스를 예약 할 수도 있습니다 .
+
+<pre>
+@Component(immediate = true, property = {
+    "scheduler.period:Long=60",
+    "scheduler.concurrent:Boolean=false",
+    "scheduler.name=PingJob"
+  }
+)
+public class PingThread implements Runnable {
+
+  @Override
+  public void run() {
+    // ..
+  }
+
+}
+</pre>
+
+그러면 스레드 (실행 가능)에 대한 작업이 등록됩니다.
+
+<pre>
+karaf@root()> scheduler:list
+Name                       │ Schedule
+───────────────────────────┼──────────────────────────────────────────
+PingJob.126                │ at(2017-11-22T15:37:17.103+01:00, -1, 10)
+</pre>
+
+@scheduler.times@ service 속성을 사용하여 스케줄러 작업의 실행 횟수를 전달할 수도 있습니다 .
+
+<pre>
+@Component(immediate = true, property = {
+    "scheduler.period:Long=60",
+    "scheduler.times:Integer=5",
+    "scheduler.concurrent:Boolean=false",
+    "scheduler.name=PingJob"
+  }
+)
+public class PingThread implements Runnable {
+
+  @Override
+  public void run() {
+    // ..
+  }
+
+}
+</pre>
+
+h3. 4.20.4. Schedule a new Job using the Gogo Shell
+
+Gogo Shell을 사용하여 새 작업 예약
+
+<pre>
+karaf@root()> scheduler:schedule-script --help
+</pre>
+
+h3. 4.20.5. Schedule a command
+
+명령 예약
+
+<pre>
+karaf@root()> scheduler:schedule-command --help
+</pre>
+
+h3. 4.20.6. Schedule a new Job using the Scheduler Service
+
+Scheduler Service을 사용하여 새 작업 예약
+
+권장 사항 : 작업 등록에 하위 수준 API를 사용하기 전에 화이트 박스 방식을 사용하는 것이 좋습니다.
+
+<pre>
+..
+import org.apache.karaf.scheduler.Scheduler;
+
+@Component
+public class Demo {
+
+  @Reference Scheduler scheduler;
+
+  public void useScheduler()
+  {
+    schedule(new MyJob(), scheduler.EXPR("0 0/10 * * * ?"));
+  }
+
+  class MyJob implements Job {
+    ..
+  }
+
+}
+</pre>
+
+h3. 4.20.7. Update scheduling of an existing job
+
+기존 작업 일정 업데이트
+
+@scheduler:reschedule@명령을 사용하여 기존 작업의 일정을 변경할 수 있습니다.
+
+이 명령어는 예약 명령어(@at, period, cron@)로 작동하지만 작업 이름(@scheduler:list@에 주어진)을 인자값으로 갖는다. 
+
+h3. 4.20.8. Using shared jobs store
+
+공유 작업 저장소 사용
+
+기본적으로 Apache Karaf 스케줄러는 로컬에 단일 Karaf 인스턴스인 작업 메모리 저장소를 사용합니다. 
+
+공유 작업 저장소를 사용하도록 여러 Karaf 인스턴스 스케줄러를 설정할 수 있습니다. 
+예시로 데이터베이스를 저장소로 사용할 수 있습니다.
+
+일반 Karaf jdbc명령을 사용하여 데이터베이스에 대한 데이터 소스를 만들 수 있습니다. 
+예를 들어, DataSource 원격 Derby 데이터베이스에 대해 설정 하려면 다음을 수행 할 수 있습니다.
+<pre>
+karaf@root()> feature:install jdbc
+karaf@root()> feature:install pax-jdbc-derbyclient
+karaf@root()> jdbc:ds-create -dn derbyclient -url jdbc:derby://host:1527/karaf_scheduler scheduler
+karaf@root()> feature:install jndi
+</pre>
+
+Quartz 배포판 ( @docs/dbTables@디렉토리에 있음) 에서 제공되는 SQL 스크립트로 DataBase 테이블을 초기화해야합니다 .
+
+@etc/org.apache.karaf.scheduler.cfg@
+
+Karaf 스케줄러 속성 구성
+<pre>
+org.quartz.scheduler.instanceName = Karaf 
+org.quartz.scheduler.instanceId = AUTO
+</pre> 
+ThreadPool 구성 
+<pre>
+org.quartz.threadPool.class = org.quartz.simpl.SimpleThreadPool 
+org .quartz.threadPool.threadCount = 30 
+org.quartz.threadPool.threadPriority = 5 
+</pre>
+JDBC 데이터 소스 구성 
+<pre>
+org.quartz.dataSource.scheduler.jndiURL=osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=scheduler)
+</pre>
+JDBC JobStore 구성 
+<pre>
+org.quartz.jobStore.class=org.quartz.impl.jdbcjobstore.JobStoreTX
+org.quartz.jobStore.dataSource=scheduler
+org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+</pre>
+
+그러면 여러 Karaf 인스턴스 스케줄러가 동일한 JDBC 작업 저장소를 공유하고 클러스터된 방식으로 작동 할 수 있습니다.
+
+h2. 4.21. Tuning
+
+h3. 4.21.1. Garbage Collection
+
+모든 Java 애플리케이션과 마찬가지로 Apache Karaf는 JVM을 사용합니다. JVM의 중요한 기능은 가비지 콜렉터입니다.
+Apache Karaf 기본 구성은 중소 규모의 요구 사항과 대부분의 컴퓨터에서 작동 할 수있는 크기입니다.
+
+이것이 기본 구성이 작은것처럼 보일 수있는 이유입니다.
+
+기본적으로 Apache Karaf는 다음을 사용합니다.
+* -Xms128M
+* -Xmx512M
+* -XX:+UnlockDiagnosticVMOptions
+
+On Sun/Oracle JVM:
+* the Perm size is the JVM default (for Java 7)
+
+On IBM JVM and AIX system:
+* -Xverify:none
+* -Xdump:heap
+* -Xlp
+
+어느 컨테이너든, 리소스 사용량과 배포 된 아티팩트의 동작을 예측하는 것은 항상 어렵습니다.
+
+일반적으로 튜닝을위한 좋은 접근 방식은 @-verbose:gc@를 활성화 하고  VisualVM과 같은 도구를 사용하여 잠재적 인 메모리 누수를 식별하고 가능한 공간 및 GC 최적화를 확인하는 것입니다.
+
+You can find introduction about GC here: [http://www.oracle.com/webfolder/technetwork/tutorials/obe/java/gc01/index.html].
+
+java6, 7 문서 참고 
+http://karaf.apache.org/manual/latest/#_garbage_collection
+
+h3. 4.21.2. Threads
+
+부하가 높은 시스템에서는 스레드 수가 매우 많을 수 있습니다.
+
+*WebContainer*
+
+Apache Karaf WebContainer를 사용하는 경우 Jetty 커넥터는 들어오는 HTTP 요청을 처리하는 스레드를 만듭니다.
+
+@etc/jetty.xml@ 구성 파일은 조정에 Jetty 커넥터을 수행 할 수 있습니다.
+
+@etc/jetty.xml@
+<pre>
+ <Call name = "addConnector"> 
+        <Arg> 
+            <New class = "org.eclipse.jetty.server.nio.SelectChannelConnector"> 
+                <Set name = "host"> 
+                    <Property name = "jetty.host"/> 
+                </ Set> 
+                <Set name = "port"> 
+                    <Property name = "jetty.port"default = "8181"/> 
+                </ Set> 
+                <Set name = "maxIdleTime"> 300000 </ Set> 
+                <Set name = "Acceptors" > 2 </ Set> 
+                <Set name = "statsOn"> false </ Set> 
+                <Set name = "confidentialPort"> 8443 </ Set> 
+                <Set name = "lowResourcesConnections"> 20000 </ Set>
+                <Set name = "lowResourcesMaxIdleTime"> 5000 </ Set> 
+            </ New> 
+        </ Arg> 
+    </ Call>
+</pre>
+
+@maxIdleTime@ : 연결에 대한 최대 비활성 시간
+@lowResourcesConnections@ : 연결 수, 현재 연결 수가 이 값보다 크면 상태는 "자원 부족"입니다. 이 경우 새 연결 시간 제한이 적용 : @lowResourceMaxIdleTime@
+@Acceptors@ : 들어오는 연결에 대한 스레드 수를 정의
+
+*Apache Camel*
+
+Apache Karaf 내에서 Apache Camel을 사용하는 경우 Camel 구성 요소는 많은 스레드를 생성 할 수 있습니다.
+Apache Camel은 threadPoolProfile의 개념을 사용 하여 스레드 생성을 제어합니다.
+
+다음 Camel 구성은 풀 생성 전략을 정의
+<pre>
+<threadPoolProfile id="defaultThreadPoolProfile" defaultProfile="true"
+                   poolSize="10" maxPoolSize="20" maxQueueSize="1000"
+                   rejectedPolicy="CallerRuns"/>
+</pre>
+
+자세한 내용 [http://camel.apache.org]
+
+*Apache CXF*
+
+Apache CXF는 작업 대기열(workqueues)을 사용하여 서버 요청/응답을 처리
+
+@etc/org.apache.cxf.workqueues-default.cfg@ 구성 파일에서 설정 확인
+
+@org.apache.cxf.workqueue.default.highWaterMark@ : 최대 스레드 수
+@org.apache.cxf.workqueue.default.lowWaterMark@ : 최소 스레드 수
+@org.apache.cxf.workqueue.default.initialSize@ : 초기 스레드 수
+
+자세한 내용 [http://cxf.apache.org] 
+
+h3. 4.21.3. System packages
+
+@etc/jre.properties@는 직접 JVM에 의해 제공되는 패키지를 정의합니다.
+
+대부분의 경우 Apache Karaf의 기본 구성은 정상이며 대부분의 사용 사례에서 작동합니다.
+
+그러나 경우에 따라 JVM에서 제공하는 패키지를 사용하지 않고 번들에서 제공하는 동일한 패키지를 사용하고 싶을 수 있습니다.
+
+예를 들어 JVM에서 제공하는 JAXB 버전이 오래되어 새 JAXB 번들을 사용하려고합니다.
+
+이 경우 JVM에서 제공하지 않도록 @etc/jre.properties@에 패키지를 주석 처리 하고 번들의 패키지를 사용해야합니다.
+

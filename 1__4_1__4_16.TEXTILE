@@ -1,0 +1,1029 @@
+
+h1. 1. 개요 
+
+카라프 기능의 간단한 목록 
+
+* deploy 디렉토리에 파일을 넣는 식의 간단한 배포 방법 . 카라프가 자동으로 파일유형을 감지하여 배포를 시도합니다.
+* Apache Karaf는 컨테이너를 완전히 관리 할 수 있는 완전한 Unix와 유사한 콘솔을 제공
+* 자체 구성 관리에 초점을 맞춘 명령 세트 제공, 모든 수정파일은 etc 폴더에 집중되어있고 자동 리로드 된다.
+* 다양한 로깅 프레임 워크 지원, 어떠한 로깅 프레임워크이던 하나의 파일에 집중된다.
+* Apache Karaf는 애플리케이션 (Maven 저장소, HTTP, 파일 등)을 설치할 수있는 대규모 URL 집합을 지원합니다. 또한 자신만의 애플리케이션을 설명하는 방법 인 "Karaf Features" 개념도 제공합니다.
+* Apache Karaf는 엔터프라이즈 용 컨테이너로 JMX를 통해 많은 관리 지표와 운영을 제공합니다.
+* Apache Karaf는 완전한 보안 프레임 워크 (JAAS 기반)를 제공하고 콘솔 및 JMX 액세스를위한 RBAC (Role-Based Access Control) 메커니즘을 제공합니다.
+* Apache Karaf의 여러 인스턴스를 기본 인스턴스 (root)에서 직접 관리 할 수 ​​있습니다.
+* OSGi 프레임 워크이다. Apache Karaf는 하나의 OSGi 프레임 워크와 밀접하게 연결되어 있지 않습니다. 기본적으로 Apache Karaf는 Apache Felix 프레임 워크로 실행되지만 Equinox로 쉽게 전환 할 수 있습니다. (구성 파일에서 속성 하나만 변경하면 됨)
+
+h1. 2. Quick Start
+
+http://karaf.apache.org/download.html
+에서 Binary Distribution 다운 
+window 면 zip 리눅스면 tar.gz
+
+h2. 4.2 디렉토리 구조
+
+http://karaf.apache.org/manual/latest/#_directory_structure
+
+h2. 4.3. Start, stop, restart, connect
+
+기본 모드
+<pre>
+bin\karaf.bat
+</pre>
+
+서버 모드 (포그라운드)
+<pre>
+bin\karaf.bat server
+</pre>
+
+백그라운드 모드
+<pre>
+bin\start.bat
+</pre>
+
+클린 스타트
+<pre>
+bin\karaf.bat clean
+</pre>
+
+karaf 환경 변수 설정
+<pre>
+rem Content of bin\setenv.bat
+set JAVA_MIN_MEM=256M
+set JAVA_MAX_MEM=1024M
+</pre>
+
+서버모드나 백그라운드 모드일 경우 접속 방법
+<pre>
+bin\client.bat
+</pre>
+
+상태
+<pre>
+bin\status.bat
+</pre>
+
+재시작
+<pre>
+system:shutdown -r
+</pre>
+
+h2. 4.4. Integration in the operating system
+
+운영체제에 intergrating
+
+h3. 4.4.1. service wrapper
+
+설치 파일 생성
+<pre>
+wrapper:install
+</pre>
+
+MS Windows system detected:
+
+서비스 설치
+<pre>
+To install the service, run:
+  C:> F:\karaf\apache-karaf-4.3.0\bin\karaf-service.bat install
+</pre>
+서비스 래퍼를 이용해 서비스 시작
+<pre>
+Once installed, to start the service run:
+  C:> net start "karaf"
+</pre>
+서비스 래퍼를 이용해 서비스 정지
+<pre>
+Once running, to stop the service run:
+  C:> net stop "karaf"
+</pre>
+서비스 래퍼를 이용한 서비스 삭제
+
+한번에 중지시키고 삭제까지
+<pre>
+Once stopped, to remove the installed the service run:
+  C:> F:\karaf\apache-karaf-4.3.0\bin\karaf-service.bat remove
+</pre>
+
+삭제
+<pre>
+feature:uninstall service-wrapper
+</pre>
+
+*Configuration*
+
+서비스 래퍼에서는 @bin\setenv.bat@ 를 사용 할 수 없기 때문에 환경설정을 변경하고 싶을 경우
+@etc/karaf-wrapper.conf@ 파일을 조정해야함 name을 변경하였을 경우
+@etc/karaf-{name}.conf@
+
+conf 파일 구성 
+http://karaf.apache.org/manual/latest/#_service_script_templates 위 쪽
+
+h3. 4.4.2. Service Script Templates
+
+@bin/contrib@ 에 서비스 스크립트 템플릿을 이용해 운영체제별 init 을 실행할 수 있다.
+http://karaf.apache.org/manual/latest/#_service_script_templates
+
+h2. 4.5. Using the console
+
+콘솔 사용하기
+
+help 를 사용하면 현재 사용 가능한 커맨드 목록을 확인할 수 있다.
+tab키를 사용하면 모든 커맨드 목록을 가져온다.
+
+커맨드들에는 각자 스코프 하나와 이름 하나를 가지고 있다.
+예를 들어, @feature:list@ 는 feature 스코프이며, list라는 이름을 가지고 있다.
+
+Karaf는 범위별로 명령을 "그룹화"합니다. 각 범위는 하위 쉘을 형성합니다.
+
+(scope:name)으로 사용
+<pre>
+karaf@root()> feature:list
+</pre>
+
+서브쉘 사용
+<pre>
+karaf@root()> feature
+karaf@root(feature)> list
+</pre>
+
+서브쉘 빠져 나오기
+<pre>
+karaf@root(feature)> exit
+karaf@root()> 
+</pre>
+
+_- CompletionMode_
+탭키와 도움 명령어의 동작을 정의
+
+* GLOBAL : 어느 쉘에 있건 모든 명령과 모든 별칭이 표시됨(기본값)
+
+* FIRST : GLOBAL 모드의 대안, 현재 subshell의 명령어 목록을 불러온다.
+
+* SUBSHELL : 실제 서브쉘 모드, 루트에서 탭키를 입력하면 하위 쉘 명령과 전역 별칭이 표시됨
+
+@etc/org.apache.karaf.shell.cfg@ 에서 지정할 수 있다. 
+
+카라프 실행중에도 모드 변경이 가능하다. 
+
+<pre>
+karaf@root()> shell:completion
+GLOBAL
+karaf@root()> shell:completion FIRST
+karaf@root()> shell:completion
+FIRST
+</pre>
+
+h3. 4.5.3. Unix like environment
+
+help 명령어 사용
+
+<pre>
+karaf @ root ()> help feature : list 
+karaf @ root ()> man feature : list 
+karaf @ root ()> feature : list --help
+</pre>
+
+탭키 명령어 완성을 사용할 때 카라프가 표시하는 목록
+* subshell 
+* commands
+* aliases
+* command arguments
+* command options
+
+alias 설정 예시
+<pre>
+karaf@root()> alias "list-features-installed = { feature:list -i }"
+karaf@root()> list-features-installed
+</pre>
+
+처음 로그인 할때 karaf는@ etc/shell.init.script@를 읽는다. 
+이곳에 alias를 설정할 수 있다. 유닉스의 bashrc나 profile 파일과 비슷하다.
+
+기본 alias들 문서 참조 
+http://karaf.apache.org/manual/latest/#_unix_like_environment
+
+karaf는 또한 유닉스와 거의 같은 key binding을 지원한다 
+* 방향키로 커맨드 히스토리 확인
+* CTRL-D to logout/shutdown Karaf
+* CTRL-R to search previously executed command
+* CTRL-U to remove the current line
+
+| (파이프) 도 지원한다. 
+<pre>
+karaf@root()> feature:list | grep -i war
+</pre>
+
+그외 지원하는 unix 커맨드 문서 참조 (Grep, more, find, …​)
+http://karaf.apache.org/manual/latest/#_unix_like_environment
+위 명령은 고유한 명령 이름을 직접 사용할 수 있다. 따라서 @shell:head@ 대신 @head@를 사용할 수 있다.
+
+Apache Karaf 콘솔은 Unix의 bash 또는 csh와 유사한 완전한 스크립팅 언어를 지원합니다.
+문서 참조 (Scripting)
+http://karaf.apache.org/manual/latest/#_unix_like_environment
+
+Apache Karaf 콘솔은 RBAC (역할 기반 액세스 제어) 보안 메커니즘을 지원합니다. 
+즉, 콘솔에 연결된 사용자의 경우 사용자의 그룹 및 역할에 따라 일부 명령을 실행할 수있는 권한을 정의하거나 인수에 허용되는 값을 제한 할 수 있습니다.
+http://karaf.apache.org/manual/latest/security
+
+h2. 4.6. Remote
+
+원격 제어 가능 
+@etc/org.apache.karaf.shell.cfg@ 파일로 환경설정
+런타임에도 변경가능 
+* by editing the etc/org.apache.karaf.shell.cfg configuration file
+* by using the config:* commands
+
+런타임중 설정 변경시 반드시 sshd 서버 재시작 해야함
+<pre>
+karaf@root()> bundle:restart -f org.apache.karaf.shell.ssh
+</pre>
+
+*Console clients*
+_- 시스템 네이티브 클라이언트_
+ssh 클라이언트를 직접 사용할 수 있습니다.
+
+<pre>
+ssh -p 8101 karaf@localhost
+</pre>
+Windows에서는 Putty, Kitty 등을 사용할 수 있습니다.
+머신에 SSH 클라이언트가 설치되어 있지 않은 경우 Apache Karaf 클라이언트를 사용할 수 있습니다.
+
+<pre>
+karaf@root()> ssh:ssh -p 8101 karaf@192.168.134.2
+</pre>
+
+_- Apache Karaf 클라이언트_
+@ssh:ssh@ 명령어는 독립적 클라이언트인 bin/client에 래핑됩니다. 
+그렇기때문에 @bin/client@를 사용하면 로컬 Apache Karaf 인스턴스에 별다른 옵션 없이 접속 가능합니다.
+
+@bin/client "system:shutdown -f"@ 와 같이 인수를 통해 실행 명령을 직접 제공할 수도 있습니다.
+
+로그아웃 
+* shell:logout
+* ctrl-D
+
+_- 파일 시스템 클라이언트_
+Apache Karaf SSHd 서버는 또한 SSH를 통해 완전한 파일 시스템 액세스를 제공합니다. 
+보안상의 이유로 사용 가능한 파일 시스템은 KARAF_BASE 디렉토리 로 제한됩니다.
+Unix에서는 scp명령을 직접 사용 하여 Apache Karaf 파일 시스템에 파일을 다운로드/업로드 할 수 있습니다.
+
+<pre>
+scp -P 8101 karaf@localhost:/data/log/karaf.log .
+</pre>
+
+Windows에서는 WinSCP를 사용하여 Apache Karaf 파일 시스템에 액세스 할 수 있습니다.
+filezilla나 gftp, nautilus 등 그래픽 클라이언트로 사용할 수 있습니다.
+
+Apache Maven
+system 폴더는 메이븐 디렉토리와 구조가 같은 karaf 레포지토리 입니다.
+
+h3. 4.6.2. JMX MBeanServer
+
+JMX MBeanServer 지원함 자세한 내용 _*+4.18. Monitoring and Management using JMX+*_ , _*+5.15.4. Monitoring+*_ 참고
+
+h2. 4.7. Log
+
+apache 가 지원하는 logging framework
+* the OSGi Log Service
+* the Apache Log4j v1 and v2 framework
+* the Apache Commons Logging framework
+* the Logback framework
+* the SLF4J framework
+* the native Java Util Logging framework
+
+h3. 4.7.1. Configuration files
+
+초기 로그 설정 @etc/org.ops4j.pax.logging.cfg@ 에서 확인 
+이파일은 log4j의 기본 설정이다.
+http://logging.apache.org/log4j/1.2/manual.html
+
+loglevel을 log4j에 유효한 값으로 변경 가능하다
+(TRACE, DEBUG, INFO, WARN, ERROR, FATAL)
+
+@osgi:*@는 OSGi Log Service에 로그 메세지를 보내는 특별한 어펜더이다.
+stdout 콘솔 어펜더는 미리 구설하지만 기본값은 아니다. 
+이 어펜더를 사용하면 로그메시지를 표준 출력에 직접 표시 할 수 있다. 
+서버 모드 사용시 (콘솔 없이) 유용하다.
+<pre>
+log4j.rootLogger=INFO, out, stdout, osgi:*
+</pre>
+out 어펜더는 기본값인데 각각 1MB로 10개의 로그를 파일시스템에 유지한다.
+로그 파일은 @data/log/karaf.log@에 위치해 있으며 기본값이다.
+@sift@ 어펜더는 기본값은 아니다. 이 어펜더는 배포된 번들당 하나의 로그 파일을 가지도록 한다.
+기본적으로 로그 파일 이름 형식은 @data/log@폴더 에있는 번들 기호 이름을 사용합니다.
+
+karaf를 재시작 할 필요없이 설정 변경가능합니다.
+
+h3. 4.7.2. Log4j v2 support
+
+Karaf 는 log4j v2 backend도 지원함
+
+log4j v2 사용하기 위해
+# etc/startup.properties 에 
+@org/ops4j/pax/logging/pax-logging-service/1.8.4/pax-logging-service-1.8.4.jar=8@ 를 
+@org/ops4j/pax/logging/pax-logging-log4j2/1.8.4/pax-logging-log4j2-1.8.4.jar=8@ 로 바꿔준다.
+# system/org/ops4j/pax/logging/pax-logging-log4j2/x.x/pax-logging-log4j2-x.x.jar 에 jar 파일 추가 
+x.x는 etc/startup.properties에 정의된 버전이다. 
+# etc/org.ops4j.pax.logging.cfg 에
+org.ops4j.pax.logging.log4j2.config.file=${karaf.etc}/log4j2.xml를 추가한다.
+# etc/log4j2.xml 파일을 추가한다.
+(etc/log4j2.xml 기본값 문서 참조)
+
+h3. 4.7.4. Commands
+
+커맨드로 로그 컨피그 변경 가능
+
+로그 항목 지움
+<pre>
+log:clear
+</pre>
+로그 항목 표시
+<pre>
+log:display
+log:display ssh
+log:display -n 5
+</pre>
+
+@etc/org.apache.karaf.log.cfg@ 에 size속성을 사용하여 저장 및 유지되는 항목 수를 제한할 수 도 있다.
+
+기본값으로 각각 로그레벨은 색으로 구분된다. Error/Fatal은 빨강, Debug는 보라, info는 회색 등등
+@--no-color@ 옵션을 사용하면 사라진다.
+
+@etc/org.ops4j.pax.logging.cfg@ pattern 기본값 
+<pre>
+pattern = %d{ISO8601} | %-5.5p | %-16.16t | %-32.32c{1} | %X{bundle.id} - %X{bundle.name} - %X{bundle.version} | %m%n
+</pre>
+
+-p 옵션을 주면 패턴을 변경할 수 있다.
+<pre>
+log:display -p "%d - %c - %m%n"
+</pre>
+%d 날짜
+%c 클래스
+%m 로그 메세지
+
+@log:exception-display@ 커맨드는 마지막으로 발생한 exception을 보여준다.
+rootLogger를 기본으로 보여주지만 logger 값을 입력하여 특정 할 수 있다.
+
+@log:get@ 커맨드는 현재 로그 레벨을 보여준다. logger 값을 입력하여 특정 할 수 있다.
+logger 값은 ALL이라는 키워트를 사용하면 모든 로거의 로그를 나타낸다.
+_log:list=log:get ALL_
+
+@log:log@ 로그에 메세지 추가할수 있다.
+<pre>
+log:log "Hello World"
+</pre>
+-l 옵션으로 로그 레벨도 지정할 수 있다.
+<pre>
+log:log -l ERROR "Hello World"
+</pre>
+@log:set@ 커맨드로 로거의 로그 레벨을 수정할 수 있다.
+기본적으로 rootLogger를 수정한다.
+<pre>
+log:set DEBUG
+log:get
+</pre>
+
+특정로거의 레벨도 수정할 수 있다.
+<pre>
+log:set INFO my.logger
+</pre>
+
+level 값은 log4j의 모든 로그 레벨을 수용한다.
+ TRACE, DEBUG, INFO, WARN, ERROR, FATAL
+그리고 DEFAULT라는 특별한 키워드도 사용한다.
+DEFAULT 키는 현재 로그 레벨을 삭제한다.
+그럴경우 로거는 부모 로거의 로그레벨을 따른다.
+부모로거의 레벨도 삭제할경우 root로거의 레벨을 따른다. 하지만 root 로거의 레벨은 삭제할 수 없다.
+
+@log:tail@ 커맨드는 @log:display@와 같지만 지속적으로 로그를 보여준다.
+*CTRL-C*를 사용해 빠져나온다.
+
+h3. 4.7.5. JMX LogMBean
+
+@log:*@ 커맨드를 사용하는 모든 동작은 LogMBean를 사용해서도 동작할 수 있다.
+LogMBean 의 오브젝트 이름은@ org.apache.karaf:type=log,name=*@ 이다.
+[attribute] 
+@level@ : 루트 로거의 레벨
+[Operations]  
+@getLevel(logger)@ 특정 로거의 레벨 가져옴 ALL 키워드 지원, 로거와 레벨을 쌍으로 Map을 리턴
+@setLevel(level, logger)@ 특정 로거의 레벨 변경 DEFAULT 키워드 지원
+
+h3. 4.7.6. Advanced configuration
+
+@etc/org.ops4j.pax.logging.cfg@ 파일에 어펜더에 필터를 적용할 수 있습니다. 
+
+* DenyAllFilter(org.apache.log4j.varia.DenyAllFilter) : 모든 로깅 이벤트를 삭제합니다. 기본값인 "달리 지시하지 않는 한 모두 허용"을 "달리 지시하지 않는 한 모두 거부" 로 전환할 수 있는 필터 입니다.
+* LevelMatchFilter(org.apache.log4j.varia.LevelMatchFilter) : 
+* LevelRangeFilter(org.apache.log4j.varia.LevelRangeFilter) : 
+* StringMatchFilter(org.apache.log4j.varia.StringMatchFilter) : 
+
+포맷은 다음과 같습니다.
+<pre>
+log4j.appender.[appender-name].filter.[filter-name]=[filter-class]
+log4j.appender.[appender-name].filter.[filter-name].[option]=[value]
+</pre>
+
+예시:
+<pre>
+log4j.appender.out.filter.f1=org.apache.log4j.varia.LevelRangeFilter
+log4j.appender.out.filter.f1.LevelMax=FATAL
+log4j.appender.out.filter.f1.LevelMin=DEBUG
+</pre>
+
+*Error handlers*
+RollingFileAppender가 파일을 작성하는중 파일 시스템이 꽉차 오류가 발생한다거나, 
+JMS appender가 메세지를 전송중 JMS broker가 동작하지 않는 등의 실패시 
+로그는 어펜더가 실패했음을 알려야 합니다.
+
+이것이 error handler의 목적
+어펜더는 자신의 오류 처리를 오류 핸들러에 위임하여 어펜더의 오류에 대응
+
+* OnlyOnceErrorHandler(org.apache.log4j.helpers.OnlyOnceErrorHandler) : 첫 번쨰 오류에 대한 메세지를 보내고
+이후의 모든 오류를 무시하는 log4j의 기본 오류처리 정책을 구현, 오류메세지는 System.err로 출력됨
+* FallbackErrorHandler (org.apache.log4j.varia.FallbackErrorHandler) : 기본 어 펜더가 실패 할 경우 보조 어 펜더가 인계 할 수 있습니다. 오류메세지는 System.err로 출력됨
+
+설정 포맷
+<pre>
+log4j.appender.[appender-name].errorhandler=[error-handler-class]
+log4j.appender.[appender-name].errorhandler.root-ref=[true|false]
+log4j.appender.[appender-name].errorhandler.logger-ref=[logger-ref]
+log4j.appender.[appender-name].errorhandler.appender-ref=[appender-ref]
+</pre>
+
+*OSGi specific MDC attributes*
+sift 어펜더는 OSGi지향 어펜더이고 MDC (Mapped Diagnostic Context) 속성 기반인 로그이벤트를 분할 할 수 있게 한다.
+MDC를 사용하면 로그 이벤트의 소스 다르게 구별 할 수 있습니다.
+
+@sift@ 어펜더가 기본으로 지원하는 OSGI 지향 MDC
+* bundle.id is the bundle ID
+* bundle.name is the bundle symbolic name
+* bundle.version is the bundle version
+
+아래와 같은 MDC 프로퍼티를 사용해 각 번들별로 로그 파일을 생성할 수 있다.
+<pre>
+log4j.appender.sift=org.apache.log4j.sift.MDCSiftingAppender
+log4j.appender.sift.key=bundle.name
+log4j.appender.sift.default=karaf
+log4j.appender.sift.appender=org.apache.log4j.FileAppender
+log4j.appender.sift.appender.layout=org.apache.log4j.PatternLayout
+log4j.appender.sift.appender.layout.ConversionPattern=%d{ABSOLUTE} | %-5.5p | %-16.16t | %-32.32c{1} | %-32.32C %4L | %m%n
+log4j.appender.sift.appender.file=${karaf.log}/$\\{bundle.name\\}.log
+log4j.appender.sift.appender.append=true
+</pre>
+
+*향상된 OSGi 스택 추적 렌더러*
+기본적으로 Apache Karaf는 일부 OSGi 특정 정보를 추가하는 특수 스택 추적 렌더러를 제공합니다.
+[id:name:version] 형태로 각 스택 추적행의 끝에서 추가되어 문제의 원인을 진단하는데 매우 유용합니다.
+* id 번들 ID입니다.
+* name 번들 이름입니다.
+* version 번들 버전입니다.
+
+*Custom appenders*
+자신만의 appender를 사용 할 수 있습니다.
+
+가장 쉬운 방법은 자신의 appender를 OSGi bundle로 패키징하고 org.ops4j.pax.logging.pax-logging-service의 fragment로 추가 하는 방법입니다.
+
+예를 들어, MyAppender를 생성하세요
+<pre>
+public class MyAppender extends AppenderSkeleton {
+...
+}
+</pre>
+
+다음과 같은 MANIFEST를 포함하는 OSGi 번들로 컴파일하고 패키징합니다.
+<pre>
+Manifest:
+Bundle-SymbolicName: org.mydomain.myappender
+Fragment-Host: org.ops4j.pax.logging.pax-logging-service
+...
+</pre>
+
+Karaf @system@ 폴더에 번들을 복사합니다. @system@ 폴더는 기본 메이븐 디렉토리 레이아웃을 사용합니다. :groupId/artifactId/version
+
+@etc/startup.properties@ 설정 파일 에서 @pax-logging-service@번들 위에 자신의 번들을 정의 합니다. 
+
+시스템 번들들을 reload 하기 위해서는 Karaf를 @clean restart@ (@data@ 폴더를 비우는 것) 해야합니다.
+이제 @etc/org.ops4j.pax.logging.cfg@구성 파일 에서 직접 어펜더를 사용할 수 있습니다.
+
+h2. 4.8. Configuration
+
+_configuration과 property를 번역할 경우 구성, 속성 이지만 오히려 더 헷갈리는 거 같아 영어로 입력 합니다. 가끔 번역되어 들어갈 수 있으니 참고해주세요._
+
+h3. 4.8.1. Environment Variables & System Properties
+
+환경 변수 및 시스템 속성
+
+Karaf는 @etc@ 폴더에 위치한 기본 설정을 사용한다. (KARAF_ETC)
+환경 변수 또는 시스템 속성을 사용하여 모든 구성을 재정의 할 수 있습니다.
+기본적으로 Karaf는 환경 변수 또는 시스템 속성을 항상 주시 하고 있기 때문에 
+PID_PROPERTY=VALUE 로 환경변수를 정의 하거나 pid.property=value로 시스템 속성을 변경하여 설정을 변경할 수 있습니다.
+
+예를 들어, 다음과 같이  etc/org.apache.karaf.shell.cfg 파일을 수정해 sshPort 를 변경할 수 있습니다.
+<pre>
+# environment variable
+export ORG_APACHE_KARAF_SHELL_SSHPORT=8102
+</pre>
+
+<pre>
+# system property
+-Dorg.apache.karaf.shell.sshPort=8102
+</pre>
+
+이 메커니즘을 사용하여 모든 구성 속성을 재정의 할 수 있습니다.
+
+구성 속성에 따라 새 값을 추가 하는것도 가능 합니다. 
+기본값에 새 기능 저장소를 추가하려는 경우 다음과 같이 env 변수를 사용할 수 있습니다. (@etc/org.apache.karaf.features.cfg@구성 파일 @featuresRepositories@등록 정보 정의)
+<pre>
+export ORG_APACHE_KARAF_FEATURES_FEATURESREPOSITORIES='${featuresRepositories},mvn:org.apache.karaf.decanter/apache-karaf-decanter/2.5.0/xml/features'
+</pre>
+이로써 karaf가 @etc/org.apache.karaf.features.cfg@로 부터 @featuresRepositories@ 값을 가져오고 거기에 @mvn:org.apache.karaf.decanter/apache-karaf-decanter/2.5.0/xml/features@를 추가하게 됩니다.
+
+h3. 4.8.2. Files
+
+카라프는 모든 설정 파일을 etc 폴더에 저장하고 읽어옴
+etc 폴더는 KARAF_BASE와 연관되어 있지만 KARAF_ETC 값을 설정함으로 다른 위치로 지정할 수 있다.
+
+각각의 설정들은 ID 값으로 구별되는데 (the ConfigAdmin PID) 설정 파일은 pid.cfg 를 따라 이름이 지어진다.
+
+예를 들어 etc/org.apache.karaf.shell.cfg는 org.apache.karaf.shell PID설정을 사용하는 파일임을 의미 합니다.
+configuration파일은 key/value로 구성된 properties file입니다.
+properties는 @${<name>}@ 구문을 사용하여 configuration 파일 내에서 참조 할 수 있습니다.
+기본값 및 대체 값은 각각 @${<name>:-<default_value>}@ 및 @${<name>:+<alternate_value>}@ 구문을 사용하여 지정할 수 있습니다 .
+
+<pre>
+existing_property=baz 
+property1=${missing_property:-foo}  #"foo" 
+property2=${missing_property:+foo} #빈 문자열 
+property3=${existing_property:-bar}  #"baz" 
+property4=${existing_property:+bar} #"bar"
+</pre>
+
+karaf는 system properties로도 적용되는데 만약 @-Dfoo=bar@ 옵션과 함께 karaf를 실행 시킨다면 
+@key=${foo}@ 를 실행 할 경우 key값은 @bar@를 포함하고 있을 것 입니다.
+
+환경 변수는 @${env:<name>}@ 구문을 사용하여 configuration 파일 내에서 참조 할 수 있습니다.
+(e.g. @property=${env:FOO}@ 는 FOO라는 환경변수의 value 값을 property에 설정) 
+위와 동일한 구문을 사용하여 기본값 및 대체 값을 정의 할 수도 있습니다.
+
+karaf는 다른 구문도 지원합니다.
+* files on disk, for example to be used with Kubernetes secrets
+* environment variables
+* properties defined in etc/config.properties
+* system properties
+
+*Secret Files*
+*Environment variables*
+*System properties*
+*cfg files*
+문서 참조 
+
+h3. 4.8.3. config:* commands
+
+karaf는 물론 configuration을 관리하는 명령어도 제공합니다.
+
+@config:list@ 는 모든 사용가능한 configuration을 출력합니다.  또는 지정된 configuration의 properties를 표시합니다 (PID)
+query 인자값이 없으면 @config:list@ 는 모든 configuration 에 정의된 PID, 첨부 된 번들 및 속성이있는 모든 구성을 표시합니다.
+
+<pre>
+config:list
+</pre> 
+query 인자값은 LDAP 구문으로 된 쿼리문 입니다.
+<pre>
+config:list "(service.pid=org.apache.karaf.log)"
+</pre>
+
+@config:edit@ 은 config를 변경하려고 할때 수행 할 첫번째 명령어 입니다. 
+@config:property-list@
+@config:property-set@
+@config:property-append@
+@config:property-delete@
+@config:update@ and @config:cancel@
+@config:delete@
+@config:meta@
+문서 참고
+http://karaf.apache.org/manual/latest/#_code_config_code_commands
+
+h3. 4.8.4. JMX ConfigMBean
+
+JMX 계층에는 구성 관리 전용 MBean 인 ConfigMBean이 있습니다.
+ConfigMBean 객체 이름은 @org.apache.karaf:type=config,name=*@입니다.
+
+[Attributes]
+@Configs@ : 모든 config PID
+
+[Operations]
+@listProperties(pid)@ :  configuration @pid@ 아래 모든 @property@ 들 출력(property=value formatted)
+@deleteProperty(pid, property)@ : configuration @pid@ 에서 @property@ 삭제 
+@appendProperty(pid, property, value)@ : configuration @pid@에  @property@ 에 @value@ 추가
+@setProperty(pid, property, value)@ : configuration @pid@에  @property@ 에 @value@ 설정
+@delete(pid)@ : @pid@로 식별되는 configuration을 삭제
+@create(pid)@ : @pid@를 사용하여 빈 (@property@없음) configuration을 만듭니다.
+@update(pid, properties)@ :제공된 properties map으로 @pid@로 식별되는 configuration을 업데이트합니다.
+
+
+h2. 4.9. Artifacts repositories and URLs
+
+기능(feature)에서 제공하는 기본 정보는 애플리케이션을 정의하는 OSGi 번들 세트입니다. 
+이러한 번들은 실제 번들 jar를 가리키는 URL입니다. 
+예를 들어 다음 정의를 작성합니다.
+<pre>
+<bundle>https://repo1.maven.org/maven2/org/apache/servicemix/nmr/org.apache.servicemix.nmr.api/1.0.0-m2/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
+</pre>
+
+이렇게하면 기능(feature)을 설치하는 동안 위의 번들이 설치됩니다.
+그러나 Karaf는 일반적인 URL 처리기 (파일, http 등 ...) 외에도 여러 URL 처리기를 제공합니다. 이들 중 하나는 Maven 리포지토리를 재사용하여 번들을 가리키는 Maven URL 핸들러입니다.
+
+Maven을 사용하지 않고 파일 시스템에서 번들을 배포 할 수 있습니다.
+
+@file:@ 을 번들을 배포할 프로토콜 핸들러 로 사용할 수 있습니다.
+아래와 같은 구문을 사용하요 Maven을 사용할 수 없는 디렉토리에 위치한 번들을 배포할 수 있습니다.
+<pre>
+<bundle>file:base/bundles/org.apache.servicemix.nmr.api-1.0.0-m2.jar</bundle>
+</pre>
+
+path 는 Karaf 설치 디렉토리
+
+h3. 4.9.1. Maven URL Handler
+
+위 번들은 아래와 같다
+<pre>
+<bundle>mvn:org.apache.servicemix.nmr/org.apache.servicemix.nmr.api/1.0.0-m2</bundle>
+</pre>
+
+외 에도 Maven URL 핸들러는 스냅 샷을 확인할 수 있으며 
+Maven 로컬 저장소에서 사용할 수있는 경우 jar의 로컬 사본을 사용할 수 있습니다.
+
+@org.ops4j.pax.url.mvn@ 번들은 mvn URL들을 해결해 준다. 
+설정 파일은 @etc/org.ops4j.pax.url.mvn.cfg@
+더 자세한 설정은 https://ops4j1.jira.com/wiki/spaces/paxurl/pages/115802124/Aether+Configuration 참고
+
+중요한 속성들
+* @org.ops4j.pax.url.mvn.repositories@ : Maven 아티팩트 해결시 발생 순서대로 확인되는 원격 저장소 URL의 쉼표로 구분 된 목록
+* @org.ops4j.pax.url.mvn.defaultRepositories@ : 원격 저장소를 쿼리하기 전에 확인되는 쉼표로 구분 된 위치 목록입니다. 아티팩트 해결 중에 아무것도 기록되지 않으므로 읽기 전용 리포지토리로 처리 할 수 ​​있습니다.
+* @org.ops4j.pax.url.mvn.localRepository@ : 기본적으로 (암시 적으로) 표준 @~/.m2/repository@위치입니다. 이 로컬 저장소는 원격 저장소 중 하나에서 다운로드 한 아티팩트를 저장하는 데 사용되므로 다음 해결 시도에서 원격 요청이 발행되지 않습니다.
+
+기본적으로 스냅 샷은 비활성화되어 있습니다. 스냅 샷에 대한 URL을 활성화하려면 @snapshots저장소 URI에 추가 합니다. 예를 들면
+
+<pre>
+org.ops4j.pax.url.mvn.repositories = http://www.example.org/repo@snapshots
+</pre>
+로컬 머신은 @file:/@
+
+h3. 4.9.2. Maven configuration commands
+
+@org.ops4j.pax.url.mvn@ 번들의 모든 configuration 은 @org.ops4j.pax.url.mvn@ PID를 사용하여 수행 할 수 있습니다. (@etc/org.ops4j.pax.url.mvn.cfg@파일 참조)
+
+그러나 이는 일부 시나리오에서 번거로울 수 있습니다.
+
+사용자의 삶을 더 쉽게 만들고 더 많은 도메인 지향 접근 방식 을 제공하기 위해 
+Karaf는 Maven 구성을 더 쉽게 만드는 몇 가지 셸 명령을 제공합니다.
+
+@maven:summary@ 이 명령은 현재 org.ops4j.pax.url.mvnPID 구성 에 대한 간략한 요약을 보여줍니다
+
+<pre>
+karaf@root()> maven:summary -s
+</pre>
+
+@maven:repository-list@
+@maven:password@
+@maven:repository-add@
+@maven:repository-remove@
+@maven:repository-change@
+@maven:http-proxy@
+
+등 
+http://karaf.apache.org/manual/latest/#_maven_configuration_commands
+문서 참조 
+
+h2. 4.10. Provisioning
+
+Apache Karaf는 Karaf 기능 개념을 사용하여 애플리케이션 및 모듈의 프로비저닝을 지원합니다.
+
+h3. 4.10.1. Application
+
+애플리케이션을 프로비저닝한다는 것은 모든 모듈, 구성(configuration) 그리고 전이 애플리케이션 (transitive applications)을 설치하는 것을 의미합니다. 
+
+h3. 4.10.2. OSGi
+
+기본적으로 OSGi 어플리케이션 배포를 지원합니다.
+OSGi 어플리케이션은 OSGi 번들세트를 의미합니다. 
+OSGi 번들은 jar MANIFEST에 추가적인 메타데이터가 들어간 보통 jar 파일입니다.
+
+OSGi에서 번들은 다른 번들에 종속 될 수 있기 때문에 OSGi 애플리케이션을 배포하려면 먼저 애플리케이션에 필요한 다른 번들을 배포해야함
+따라서 먼저 이러한 번들을 찾아서 번들을 설치해야합니다. 다시 말하지만, 이러한 "종속성"번들은 자체 종속성을 충족하기 위해 다른 번들이 필요할 수 있습니다.
+일반적으로 응용 프로그램에는 구성이 필요합니다 (사용자 가이드의 _*+4.8. Configuration+*_ 참조). 
+그렇기 때문에 애플리케이션을 시작하기 전에 종속성 번들 외에 구성을 생성하거나 배포해야합니다.
+
+h3. 4.10.3. Feature and resolver
+
+"feature"는(기능) 카라프에서의 어플리케이션 프로비저닝을 의미한다.
+
+feature 에서는 어플리케이션의 다음 항목들을 나타내고 있다. 
+* 이름
+* 버전
+* 선택적 설명
+* 번들 세트
+* 선택적 config 세트 나 config 파일
+* optionally a set of dependency features
+
+feature 를 설치 할 때 karaf 는 기능에 설명된 모든 리소스를 설치합니다.
+
+feature resolver 는 서비스 요구 사항을 확인하고 요구 사항과 일치하는 서비스를 제공하는 번들을 설치
+기본 모드는 새 스타일의 features 저장소에 (1.3.0 이상인  features repositories XML ) 대해서만 활성화 되고 이전 스타일에는(Karaf 2 or 3) 적용되지 않는다. 
+
+etc/org.apache.karaf.features.cfg 에서 서비스 요구 사항 적용 모드를 변경할 수 있다.
+<pre>
+serviceRequirements=default
+</pre>
+* disable: "이전 스타일"및 "새 스타일"기능 저장소 모두에 대해 서비스 요구 사항이 완전히 무시됩니다.
+* default : "이전 스타일"기능 저장소에 대해서는 서비스 요구 사항이 무시되고 "새 스타일"기능 저장소에 대해 활성화됩니다.
+* enforce: "이전 스타일"및 "새 스타일"기능 저장소에 대한 서비스 요구 사항이 항상 확인됩니다.
+
+h3. 4.10.4. Features repositories
+
+Feature들은  features XML descriptor에 적힌다. 이 XML 파일은  feature 세트의 설명을 담고 있다. 이러한 Features XML descriptor를 "Features repository"라 부른다.
+feature를 설치하기 전에 feature를 제공하는 Features repository를 등록해야한다.
+
+Feature 상태는 Apache Karaf 캐시 ( KARAF_DATA 폴더) 에 저장
+Karaf를 다시 시작할 수 있으며 이전에 설치된 기능은 설치된 상태로 유지되며 다시 시작한 후에도 사용할 수 있습니다. 
+완전히 다시 시작하거나 Apache Karaf 캐시를 삭제 ( KARAF_DATA폴더 삭제 )하면 이전에 등록 된 모든 기능 저장소와 설치된 기능이 손실됩니다. 
+기능 저장소를 등록하고 기능을 다시 직접 설치해야합니다. 
+이 동작을 방지하기 위해 기능을 부팅 기능으로 지정할 수 있습니다.
+
+h3. 4.10.5. Boot features
+
+부팅 기능은 이전에 feature:install또는 FeatureMBean을 사용하여 설치되지 않았더라도 Apache Karaf에 의해 자동으로 설치됩니다.
+@etc/org.apache.karaf.features.cfg@ 에 부팅 기능 속성 두가지가 포함되어 있음
+
+* featuresRepositories 기능 저장소 (기능 XML) URL 목록 (쉼표로 구분)을 포함합니다.
+* featuresBoot 부팅시 설치할 기능 목록 (쉼표로 구분)이 포함되어 있습니다.
+
+featuresBoot 기능 제거하려면 etc/org.apache.karaf.features.cfg에 원치 않는 기능을 제거하고 컨테이너를 다시 시작하면 됩니다.
+
+h3. 4.10.6. Features upgrade
+
+동일한 기능 (동일한 SNAPSHOT 버전 또는 다른 버전 사용)을 설치하여 릴리스를 업데이트 할 수 있습니다.
+기능 수명주기 덕분에 기능의 상태 (시작됨, 중지됨 등)를 제어 할 수 있습니다.
+또한 시뮬레이션을 사용하여 업데이트가 수행 할 작업을 확인할 수 있습니다.
+
+h3. 4.10.7. Overrides
+
+기능에 정의 된 번들은 
+@etc/overrides.properties@
+파일을 사용하여 재정의 할 수 있습니다
+
+h3. 4.10.8. Feature bundles
+
+*Start Level*
+기본적으로 피쳐로 배포된 번들은
+@etc/config.properties@ 에 @karaf.startlevel.bundle@ 속성으로 정의된  start-level을 따른다
+
+이 값은 feature XML에 <bundle/> 요소의 start-level 값에의해 재정의 될 수 있다.
+
+<pre>
+ <feature name="my-project" version="1.0.0">
+    <bundle start-level="80">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle start-level="85">mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+</pre>
+start-level 값에 의해 myproject-dao 번들은 먼저 시작됨
+
+시작 수준을 사용하는 대신 필요한 패키지 또는 서비스를 정의하여 OSGi 프레임 워크에 종속성이 무엇인지 알려주는 것이 더 나은 솔루션입니다. 시작 레벨을 설정하는 것보다 더 강력합니다.
+
+*Simulate, Start and stop*
+
+@feature:install@ 커맨드에서 @-t@ 옵션을 주면 피쳐 설치 시뮬레이션을 해볼수있습니다.
+번들을 시작하지 않고 설치해도 기본적으로 번들은 자동 시작됩니다.
+
+@<bundle/>@ 에 @start@ 값을 @false@로 줌으로 자동시작을 없앨수 있다.
+
+<pre>
+<feature name="my-project" version="1.0.0">
+    <bundle start-level="80" start="false">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle start-level="85" start="false">mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+</pre>
+
+*Dependency*
+
+번들은 @<bundle/>@ 에 @dependency@ 값을 @ture@로 줌으로써 @dependency@로 플래그를 지정 할 수 있다  
+이 정보는 해석기가 설치할 전체 번들 목록을 계산하는 데 사용할 수 있습니다.
+
+h3. 4.10.9. Dependent features
+
+피쳐는 다른 피쳐 세트에 종속될 수 있다.
+
+<pre>
+<feature name="my-project" version="1.0.0">
+    <feature>other</feature>
+    <bundle start-level="80" start="false">mvn:com.mycompany.myproject/myproject-dao</bundle>
+    <bundle start-level="85" start="false">mvn:com.mycompany.myproject/myproject-service</bundle>
+  </feature>
+</pre>
+
+위 @my-project@를 설치하면 @other@ 피쳐가 자동으로 설치될 것 입니다.
+
+종속 피쳐의 버전 구간도 지정할수 있습니다.
+<pre>
+<feature name="spring-dm">
+  <feature version="[2.5.6,4)">spring</feature>
+  ...
+</feature>
+</pre>
+범위에서 사용가능한 가장 높은 버전의 피쳐가 설치됩니다.
+단일 버전이 지정되면 범위는 개방형으로 간주됩니다.
+아무 것도 지정하지 않으면 사용 가능한 가장 높은 것이 설치됩니다.
+특정 버전사용을 원하면 [3.1,3.1] 과 같이 갇힌 범위를 지정합니다.
+
+*Feature prerequisites*
+
+전제 조건 피쳐는 특별한 종류의 종속성이다.
+종속 피쳐에 @prerequisite@ 값을 추가하면 강제로 먼저 설치된다.
+이는 주어진 기능에 등록 된 번들이 @wrap@ 또는 @war@ 같은 사전 설치된 URL을 사용하지 않는 경우에 유용 할 수 있습니다.
+
+h3. 4.10.10. Feature configurations
+
+@<config/>@ XML 요소를 사용해 feature 에 config(configuration PID로 식별됨)를 생성 할 수 있습니다. 
+
+<pre>
+<config name="com.foo.bar">
+  myProperty = myValue
+</config>
+</pre>
+
+<config>의 name은 configuration PID에 해당한다.
+
+이 기능을 설치하는 것은 etc 폴더에 com.foo.bar.cfg이름의 파일을 넣는것과 같다.
+ key=value 값이다.
+
+h3. 4.10.11. Feature configuration files
+
+<config/> 대신에 <configfile/>을 설정할 수 도 있다.
+
+<pre>
+<configfile finalname="/etc/myfile.cfg" override="false">URL</configfile>
+</pre>
+
+<config/>를 사용하여 Karaf config layer를 직접 조작하는 대신에 <configfile/>은  URL로 지정된 파일을 직접 가져와 finalname속성에 지정된 위치에 파일을 복사 합니다.
+지정되지 않은 경우 위치는 KARAF_BASE변수와 상대적입니다 . $ {karaf.home}, $ {karaf.base}, $ {karaf.etc} 또는 시스템 속성과 같은 변수를 사용할 수도 있습니다.
+
+예시
+<pre>
+<configfile finalname="${karaf.etc}/myfile.cfg" override="false">URL</configfile>
+</pre>
+
+파일이 원하는 위치에 이미있는 경우 이미 존재하는 파일에 사용자 지정이 포함될 수 있으므로 파일이 유지되고 구성 파일의 배포를 건너 뜁니다. 
+이 동작은 override 를 true 로 설정하여 무시할 수 있습니다 .
+
+파일 URL은 Apache Karaf에서 지원하는 URL입니다. (자세한 내용은 *+_4.9. Artifacts repositories and URLs_+* 참조)
+
+요구사항을 지정할수도 있다. 
+예를들어
+<pre>
+<requirement>osgi.ee;filter:=&quot;(&amp;(osgi.ee=JavaSE)(!(version&gt;=1.8)))&quot;</requirement>
+</pre>
+
+요구 사항은 JDK 버전이 1.8 (기본적으로 1.7)이 아닌 경우에만 기능이 작동하도록 지정합니다.
+
+h3. 4.10.12. Commands
+
+@feature:repo-list@
+@feature:repo-add@
+@feature:repo-refresh@
+@feature:repo-remove@
+@feature:list@
+@feature:install@
+@feature:start@
+@feature:stop@
+@feature:uninstall@
+
+h3. 4.10.13. Deployer
+
+파일을 deploy폴더에 직접 놓아 feature XML을 쉽게 배포 할 수 있습니다 .
+karaf는 features deployer를 제공한다.
+deploy 폴더에 features XML를 넣으면 features deployer는
+* features repository로 features XML를 등록
+* install이 "auto"인 feature들이 features deployer에 의해 자동적으로 설치된다.
+
+h3. 4.10.14. JMX FeatureMBean
+
+
+FeatureMBean의 오브젝트 이름은 @org.apache.karaf:type=feature,name=*@ 이다.
+
+
+[Attributes]
+
+* Features 
+- Name 
+- Version 
+- Bundles 
+- Configurations 
+- Configuration Files
+- Dependencies 
+
+* Repositories 
+- Name
+- Uri
+- Features 
+- Repositories 
+
+[Operations]
+
+@addRepository(url)@
+@addRepository(url, install)@
+@removeRepository(url)@
+@installFeature(name)@
+@installFeature(name, version)@
+@installFeature(name, noClean, noRefresh)@
+@installFeature(name, version, noClean, noRefresh)@
+@uninstallFeature(name)@
+@uninstallFeature(name, version)@
+
+h2. 4.11. Deployers
+
+Apache Karaf는 @deploy@폴더에서 새 파일을 폴링 합니다.
+구성 파일 @deploy@에서 폴더 위치 및 폴링 동작을 @etc/org.apache.felix.fileinstall-deploy.cfg@에서구성 할 수 있습니다.
+
+@felix.fileinstall.dir@ : @deploy@폴더 의 위치를 ​​정의 합니다. 기본값은 @KARAF_BASE/deploy@입니다.
+@felix.fileinstall.tmpdir@ : 배포자가 파일을 저장하는 임시 폴더를 정의합니다. 기본값은 @KARAF_DATA/generated-bundles@입니다.
+@felix.fileinstall.poll@ : 폴링 간격을 정의합니다. 기본값은 1 초입니다.
+
+Apache Karaf는 배포 폴더에서 파일을 폴링 할 때 파일 처리를 배포자에게 "위임"합니다.
+
+h2. 4.16. OBR
+
+OBR (OSGi Bundle Repository) 의 목적
+# 번들사용 및 배포 단순화
+# 독립적인 번들 개발 장려
+
+OBR은 번들 저장소에서 배포 종속성과 함께 번들을 자동으로 설치할 수 있는 서비스를 제공함으로써 첫 번째 목표를 달성합니다. 
+이렇게 하면 사람들이 기존 번들과 더 쉽게 실험 할 수 있습니다.
+
+두 번째 목표는 저장소에서 사용 가능한 번들의 가시성을 높이는 것입니다.
+OBR은 선택적 Apache Karaf 기능입니다. OBR 서비스를 사용 하려면 @obr@기능을 설치해야합니다 .
+
+<pre>
+karaf@root()> feature:install obr
+</pre>
+
+@obr@ 기능은 Apache Karaf를 OBR 클라이언트로 전환합니다. 
+이는 Apache Karaf가 번들 설치 및 기능 설치 중에 OBR 저장소를 사용할 수 있음을 의미합니다.
+
+@obr@ 기능 설치 시 karaf에 추가되는 것
+
+* the OBR service
+* the features OBR resolver
+* the obr:* commands
+* the JMX ObrMBean
+
+OBR 저장소는 모든 번들을 포함한다. OBR service 는 OBR repository(OBR 메타 데이터)에 있는 각각 번들의 기능과 모든 의존성을 안다.
+
+덕분에 당신이 OBR 서비스로 번들을 설치(OBR 에서 배포)할때 번들 의존성과 매치되는 모든 기능을 제공하는 모든 번들을 찾는다.
+번들에 필요한 번들을 자동으로 설치합니다.
+
+h3. 4.16.1. Features OBR resolver
+
+@obr@이 @resolver@ 속성에 지정된 경우 Apache Karaf는 OBR 서비스를 사용하여 기능과 함께 설치할 번들 목록을 구성 할 수 있습니다.
+The feature default resolver는 feature 자체에 설명된 번들만 고려합니다.
+
+the OBR resolver를 사용해 Karaf는 OBR 서비스를 사용하여 기능 설치시 번들 목록을 확장 할 수 있습니다.
+
+h3. 4.16.2. Commands
+
+@obr:url-add@
+@obr:url-list@
+@obr:url-refresh@
+@obr:url-remove@
+@obr:list@
+@obr:info@
+@obr:source@
+@obr:resolve@
+@obr:find@
+@obr:deploy@
+
+
+h3. 4.16.3. obr:start
+
+@obr:start@는 @obr:deploy -s@와 같다.
+
+h3. 4.16.4. JMX ObrMBean
+
+ObrMBean의 오브젝트 이름은 @org.apache.karaf:type=obr,name=*@ 이다.
+
+[Attributes]
+@Urls@ 
+@Bundles@
+
+[Operations]
+@addUrl(url) @
+@removeUrl(url)@
+@refreshUrl(url)@
+@deployBundle(name)@
+@deployBundle(name, start, deployOptional)@
+
+h3. 4.16.5. Apache Karaf Cave
+
+OBR 클라이언트 인 것 외에도 Apache Karaf는 Apache Karaf Cave 덕분에 OBR 리포지토리 서버 역할을 할 수 있습니다.
+
+See the [https://karaf.apache.org/projects.html] for details.
+

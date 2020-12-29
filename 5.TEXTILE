@@ -233,9 +233,10 @@ karaf@root()> bundle:start
 </pre>
 
 h3. 5.1.6. Bundle tree
+
 @bundle:tree-show@
 
-Diagnostic dump created.
+d.
 </pre>
 
 h3. 5.1.2. Diagnostic
@@ -274,15 +275,4 @@ karaf@root()> system:framework -nodebug
 Disabling debug for OSGi framework (felix)
 </pre>
 
-h3. 5.1.5. Stack traces printout
 
-@shell:stack-traces-print@명령 실행시 예외가 발생하면 이 명령은 전체 스택 추적을 인쇄합니다.
-true (활성화) 또는 false (비활성화)를 즉시 명령에 전달하여 동작을 활성화하거나 비활성화 할 수 있습니다.
-<pre>
-karaf@root()> stack-traces-print
-Printing of stacktraces set to true
-karaf@root()> bundle:start
-</pre>
-
-h3. 5.1.6. Bundle tree
-@bundle:tree-show@
